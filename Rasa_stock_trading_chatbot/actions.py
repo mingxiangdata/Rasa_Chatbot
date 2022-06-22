@@ -39,14 +39,14 @@ class ActionPortfolio(Action):
             message = "Your account is restricted ffrom trading."
 
         else:
-            mess = 'Your Trading account Number is: {}'.format(account.account_number)
-            mess1 = 'Your portfolio Value is ${}'.format(account.portfolio_value)
+            mess = f'Your Trading account Number is: {account.account_number}'
+            mess1 = f'Your portfolio Value is ${account.portfolio_value}'
 
-            mess2 = '${} is available cash for trading.'.format(account.cash)
-            mess3 = '${} is available as buying power.'.format(account.buying_power)
+            mess2 = f'${account.cash} is available cash for trading.'
+            mess3 = f'${account.buying_power} is available as buying power.'
 
             total_stock = float(account.portfolio_value) - float(account.cash)
-            mess4 = 'Total value of stock available in your porfolio is ${}'.format(total_stock)
+            mess4 = f'Total value of stock available in your porfolio is ${total_stock}'
 
             balance_change = float(account.equity) - float(account.last_equity)
             mess5 = f'Today portfolio balance changes: ${balance_change}'
@@ -70,14 +70,16 @@ class ActionTransaction(Action):
         last = api.list_orders(status = 'all', limit = 5, direction = 'desc')
         for order in last:
             if order.order_type == 'limit':
-                mess = 'Transacted At '+ str(order.submitted_at)+ ' '+ order.order_type.capitalize()+ ' order to '+ order.side + ' '+ str(order.qty) + ' stock of '
+                mess = f'Transacted At {str(order.submitted_at)} {order.order_type.capitalize()} order to {order.side} {str(order.qty)} stock of '
+
                 +order.symbol + ' company'+ ' is '+ order.status + ' with limit price of $' + order.limit_price + '.'
             else:
-                mess = 'Transacted At '+ str(order.submitted_at)+ ' '+ order.order_type.capitalize() + ' order to ' + order.side+ ' ' + str(order.qty) + ' stock of '
+                mess = f'Transacted At {str(order.submitted_at)} {order.order_type.capitalize()} order to {order.side} {str(order.qty)} stock of '
+
                 + order.symbol + ' company is ' + order.status+'.'
 
             message = message + '\n' + mess
-            
+
         dispatcher.utter_message(text= message)
 
         return []
@@ -114,14 +116,23 @@ class ActionStockBuy(Action):
         if order_type.lower() == 'limit':
             price = tracker.get_slot("price")
             order = api.submit_order(symbol = ticker, qty = quantity, side = 'buy', type = 'limit', limit_price = price, time_in_force = 'day')
-            mess = order.order_type.capitalize() + ' order to '+ order.side + ' ' + str(order.qty)+ ' stock of ' + order.symbol + ' company is '+ order.status + ' with limit price of $'+order.limit_price +'.'
+            mess = f'{order.order_type.capitalize()} order to {order.side} {str(order.qty)} stock of {order.symbol} company is {order.status} with limit price of ${order.limit_price}.'
+
 
         else:
             order = api.submit_order(symbol = ticker, qty = quantity, side = 'buy', type='market', time_in_force = 'day')
-            mess = order.order_type.capitalize() + ' order to '+order.side +' '+ str(order.qty) + ' stock of ' + order.symbol + ' company is ' + order.status + '.'
+            mess = f'{order.order_type.capitalize()} order to {order.side} {str(order.qty)} stock of {order.symbol} company is {order.status}.'
+
 
         balance_change = float(account.equity) - float(account.last_equity)
-        message = mess + '\n' + "Your Portfolio value is ${}".format(account.portfolio_value) +'\n' + f'Today portfolio balance change: ${balance_change}'
+        message = (
+            mess
+            + '\n'
+            + f"Your Portfolio value is ${account.portfolio_value}"
+            + '\n'
+            + f'Today portfolio balance change: ${balance_change}'
+        )
+
 
         dispatcher.utter_message(text=message)
 
